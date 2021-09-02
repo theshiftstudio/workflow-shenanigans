@@ -1,5 +1,6 @@
 package com.shiftstudio.workflowshenanigans.account
 
+import android.os.Parcelable
 import android.util.Log
 import com.shiftstudio.workflowshenanigans.ShenanigansWorkflow.ActivityAndProps
 import com.shiftstudio.workflowshenanigans.account.AccountWorkflow.Back
@@ -12,19 +13,11 @@ import com.squareup.workflow1.StatefulWorkflow
 import com.squareup.workflow1.Workflow
 import com.squareup.workflow1.action
 import com.squareup.workflow1.asWorker
-import com.squareup.workflow1.parse
-import com.squareup.workflow1.readBooleanFromInt
-import com.squareup.workflow1.readByteStringWithLength
-import com.squareup.workflow1.readUtf8WithLength
 import com.squareup.workflow1.runningWorker
-import com.squareup.workflow1.writeBooleanAsInt
-import com.squareup.workflow1.writeByteStringWithLength
-import com.squareup.workflow1.writeUtf8WithLength
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.delayFlow
+import com.squareup.workflow1.ui.toParcelable
+import com.squareup.workflow1.ui.toSnapshot
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.onStart
-import okio.ByteString
+import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
 
 interface AccountWorkflow : Workflow<ActivityAndProps<Unit>, Back, Any> {
@@ -41,41 +34,19 @@ class AccountWorkflowImpl @Inject constructor(
     private val loginWorkflow: LoginWorkflow,
 ) : AccountWorkflow, StatefulWorkflow<ActivityAndProps<Unit>, State, Back, Any>() {
 
-    sealed class State {
+    sealed class State : Parcelable {
+        @Parcelize
         object Loading : State()
 
+        @Parcelize
         object Unauthorized : State()
 
+        @Parcelize
         data class Authorized(val user: User, val signingOut: Boolean = false) : State()
-
-        fun toSnapshot(): Snapshot = Snapshot.write { sink ->
-            sink.writeUtf8WithLength(this::class.java.name)
-
-            if (this is Authorized) {
-                sink.writeByteStringWithLength(user.toSnapshot().bytes)
-                sink.writeBooleanAsInt(signingOut)
-            }
-        }
-
-        companion object {
-
-            fun fromSnapshot(byteString: ByteString): State = byteString.parse { source ->
-                when (val className = source.readUtf8WithLength()) {
-                    Loading::class.java.name -> Loading
-                    Unauthorized::class.java.name -> Unauthorized
-                    Authorized::class.java.name -> Authorized(
-                        user = User.fromSnapshot(source.readByteStringWithLength()),
-                        signingOut = source.readBooleanFromInt(),
-                    )
-                    else -> throw IllegalArgumentException("Unknown type $className")
-                }
-            }
-        }
     }
 
     override fun initialState(props: ActivityAndProps<Unit>, snapshot: Snapshot?): State =
-        snapshot?.bytes?.let { State.fromSnapshot(it) }
-            ?: State.Loading
+        snapshot?.toParcelable() ?: State.Loading
 
     override fun render(
         renderProps: ActivityAndProps<Unit>,

@@ -2,6 +2,7 @@ package com.shiftstudio.workflowshenanigans.login
 
 import android.app.Activity
 import android.content.Intent
+import android.os.Parcelable
 import com.firebase.ui.auth.AuthMethodPickerLayout
 import com.firebase.ui.auth.AuthUI
 import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract
@@ -21,15 +22,12 @@ import com.squareup.workflow1.Worker
 import com.squareup.workflow1.Workflow
 import com.squareup.workflow1.action
 import com.squareup.workflow1.asWorker
-import com.squareup.workflow1.parse
-import com.squareup.workflow1.readByteStringWithLength
-import com.squareup.workflow1.readUtf8WithLength
 import com.squareup.workflow1.runningWorker
-import com.squareup.workflow1.writeByteStringWithLength
-import com.squareup.workflow1.writeUtf8WithLength
+import com.squareup.workflow1.ui.toParcelable
+import com.squareup.workflow1.ui.toSnapshot
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.callbackFlow
-import okio.ByteString
+import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
 
 interface LoginWorkflow : Workflow<ActivityAndProps<Unit>, LoginResult, Any> {
@@ -51,40 +49,19 @@ class LoginWorkflowImpl @Inject constructor(
     private val userRepository: UserRepository,
 ) : LoginWorkflow, StatefulWorkflow<ActivityAndProps<Unit>, State, LoginResult, Any>() {
 
-    sealed class State {
+    sealed class State : Parcelable {
+        @Parcelize
         object Authorizing : State()
 
+        @Parcelize
         data class Authorized(val user: User) : State()
 
+        @Parcelize
         data class Failed(val cause: String) : State()
-
-        fun toSnapshot(): Snapshot = Snapshot.write { sink ->
-            sink.writeUtf8WithLength(this::class.java.name)
-            when (this) {
-                is Authorizing -> {
-                    // no-op
-                }
-                is Authorized -> sink.writeByteStringWithLength(user.toSnapshot().bytes)
-                is Failed -> sink.writeUtf8WithLength(cause)
-            }
-        }
-
-        companion object {
-            fun fromSnapshot(byteString: ByteString): State = byteString.parse { source ->
-                when (val className = source.readUtf8WithLength()) {
-                    Authorizing::class.java.name -> Authorizing
-                    Authorized::class.java.name -> Authorized(user = User.fromSnapshot(source.readByteStringWithLength()))
-                    Failed::class.java.name -> Failed(cause = source.readUtf8WithLength())
-                    else -> throw IllegalArgumentException("Unknown type $className")
-                }
-            }
-        }
     }
 
-    override fun initialState(props: ActivityAndProps<Unit>, snapshot: Snapshot?): State {
-        return snapshot?.bytes?.let { State.fromSnapshot(it) }
-            ?: State.Authorizing
-    }
+    override fun initialState(props: ActivityAndProps<Unit>, snapshot: Snapshot?): State =
+        snapshot?.toParcelable() ?: State.Authorizing
 
     override fun render(
         renderProps: ActivityAndProps<Unit>,
