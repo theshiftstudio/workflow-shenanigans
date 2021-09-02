@@ -125,9 +125,6 @@ class LoginWorkflowImpl @Inject constructor(
                     setOutput(LoginResult.Authorized(renderState.user))
                 }
             }
-            context.runningSideEffect("sideEffect-save-user") {
-                userRepository.setCurrentUser(renderState.user)
-            }
             AuthorizingRendering(message = "")
         }
 
