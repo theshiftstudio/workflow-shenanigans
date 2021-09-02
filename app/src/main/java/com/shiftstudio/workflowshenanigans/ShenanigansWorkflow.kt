@@ -2,6 +2,7 @@
 
 package com.shiftstudio.workflowshenanigans
 
+import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import com.shiftstudio.workflowshenanigans.ShenanigansWorkflow.ActivityAndProps
 import com.shiftstudio.workflowshenanigans.account.AccountViewRegistry
@@ -12,7 +13,6 @@ import com.squareup.workflow1.Snapshot
 import com.squareup.workflow1.StatefulWorkflow
 import com.squareup.workflow1.Workflow
 import com.squareup.workflow1.action
-import com.squareup.workflow1.parse
 import com.squareup.workflow1.ui.NamedViewFactory
 import com.squareup.workflow1.ui.ViewRegistry
 import com.squareup.workflow1.ui.WorkflowUiExperimentalApi
@@ -20,6 +20,9 @@ import com.squareup.workflow1.ui.backstack.BackStackContainer
 import com.squareup.workflow1.ui.backstack.BackStackScreen
 import com.squareup.workflow1.ui.backstack.toBackStackScreen
 import com.squareup.workflow1.ui.plus
+import com.squareup.workflow1.ui.toParcelable
+import com.squareup.workflow1.ui.toSnapshot
+import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
 
 interface ShenanigansWorkflow : Workflow<ActivityAndProps<Unit>, Nothing, BackStackScreen<Any>> {
@@ -40,17 +43,16 @@ class ShenanigansWorkflowImpl @Inject constructor(
 ) : ShenanigansWorkflow,
     StatefulWorkflow<ActivityAndProps<Unit>, ShenanigansWorkflowImpl.State, Nothing, BackStackScreen<Any>>() {
 
-    sealed class State {
+    sealed class State : Parcelable {
+        @Parcelize
         object Welcome : State()
 
+        @Parcelize
         object Account : State()
     }
 
-    override fun initialState(props: ActivityAndProps<Unit>, snapshot: Snapshot?): State {
-        return snapshot?.bytes
-            ?.parse { source -> if (source.readInt() == 0) State.Welcome else State.Account }
-            ?: State.Welcome
-    }
+    override fun initialState(props: ActivityAndProps<Unit>, snapshot: Snapshot?): State =
+        snapshot?.toParcelable() ?: State.Welcome
 
     override fun render(
         renderProps: ActivityAndProps<Unit>,
@@ -91,7 +93,5 @@ class ShenanigansWorkflowImpl @Inject constructor(
         state = State.Welcome
     }
 
-    override fun snapshotState(state: State): Snapshot {
-        return Snapshot.of(if (state == State.Welcome) 0 else 1)
-    }
+    override fun snapshotState(state: State): Snapshot = state.toSnapshot()
 }
