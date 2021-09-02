@@ -57,7 +57,7 @@ class LoginWorkflowImpl @Inject constructor(
         object Authorizing : State()
 
         @Parcelize
-        data class Authorized(val user: User) : State()
+        data class SavingUser(val user: User) : State()
 
         @Parcelize
         data class Failed(val cause: String) : State()
@@ -93,7 +93,7 @@ class LoginWorkflowImpl @Inject constructor(
             AuthorizingRendering()
         }
 
-        is State.Authorized -> {
+        is State.SavingUser -> {
             context.runningWorker(
                 Worker.from {
                     userRepository.setCurrentUser(renderState.user)
@@ -125,7 +125,7 @@ class LoginWorkflowImpl @Inject constructor(
             // maybe...
             if (firebaseUser != null) {
                 val user = firebaseUser.toUser()
-                state = State.Authorized(user)
+                state = State.SavingUser(user)
             } else {
                 val cause = "Auth successful but FirebaseAuth.getInstance().currentUser is null."
                 state = State.Failed(cause)
