@@ -1,7 +1,9 @@
-package com.shiftstudio.workflowshenanigans.login
+package com.shiftstudio.workflowshenanigans.login.domain
 
 import android.content.Context
 import com.firebase.ui.auth.AuthUI
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,8 +17,7 @@ class UserRepository @Inject constructor(
     @ApplicationContext private val context: Context,
 ) {
 
-    // TODO: for now, we start with null so auth starts everytime time app is open, for testing stuff
-    private val _currentUser = MutableStateFlow<User?>(null)
+    private val _currentUser = MutableStateFlow(FirebaseAuth.getInstance().currentUser?.toUser())
     val currentUser: Flow<User?> = _currentUser.asStateFlow()
 
     fun setCurrentUser(user: User) {
@@ -32,3 +33,9 @@ class UserRepository @Inject constructor(
         }
     }
 }
+
+fun FirebaseUser.toUser(): User = User(
+    uid = this.uid,
+    name = this.displayName ?: "",
+    email = this.email ?: "",
+)

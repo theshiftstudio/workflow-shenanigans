@@ -1,4 +1,4 @@
-package com.shiftstudio.workflowshenanigans.login
+package com.shiftstudio.workflowshenanigans.login.domain
 
 import com.squareup.workflow1.Snapshot
 import com.squareup.workflow1.parse

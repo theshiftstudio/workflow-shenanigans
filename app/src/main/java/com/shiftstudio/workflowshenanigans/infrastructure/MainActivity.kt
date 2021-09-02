@@ -11,7 +11,7 @@ import androidx.compose.ui.Modifier
 import com.shiftstudio.workflowshenanigans.ShenanigansViewRegistry
 import com.shiftstudio.workflowshenanigans.ShenanigansWorkflow
 import com.shiftstudio.workflowshenanigans.ShenanigansWorkflow.ActivityAndProps
-import com.shiftstudio.workflowshenanigans.ui.theme.WorkflowShenanigansTheme
+import com.shiftstudio.workflowshenanigans.infrastructure.theme.WorkflowShenanigansTheme
 import com.squareup.workflow1.ui.ViewEnvironment
 import com.squareup.workflow1.ui.ViewRegistry
 import com.squareup.workflow1.ui.WorkflowUiExperimentalApi
@@ -30,7 +30,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            WorkflowShenanigansTheme {
+            WorkflowShenanigansTheme(darkTheme = false) {
                 // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),

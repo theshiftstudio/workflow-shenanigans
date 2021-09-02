@@ -1,14 +1,20 @@
 package com.shiftstudio.workflowshenanigans.login
 
 import android.app.Activity
+import android.content.Intent
+import com.firebase.ui.auth.AuthMethodPickerLayout
 import com.firebase.ui.auth.AuthUI
 import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract
 import com.firebase.ui.auth.data.model.FirebaseAuthUIAuthenticationResult
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
+import com.shiftstudio.workflowshenanigans.BuildConfig
+import com.shiftstudio.workflowshenanigans.R
 import com.shiftstudio.workflowshenanigans.ShenanigansWorkflow.ActivityAndProps
 import com.shiftstudio.workflowshenanigans.login.LoginWorkflow.LoginResult
 import com.shiftstudio.workflowshenanigans.login.LoginWorkflowImpl.State
+import com.shiftstudio.workflowshenanigans.login.domain.User
+import com.shiftstudio.workflowshenanigans.login.domain.UserRepository
+import com.shiftstudio.workflowshenanigans.login.domain.toUser
 import com.squareup.workflow1.Snapshot
 import com.squareup.workflow1.StatefulWorkflow
 import com.squareup.workflow1.Worker
@@ -21,10 +27,6 @@ import com.squareup.workflow1.readUtf8WithLength
 import com.squareup.workflow1.runningWorker
 import com.squareup.workflow1.writeByteStringWithLength
 import com.squareup.workflow1.writeUtf8WithLength
-import dagger.Binds
-import dagger.Module
-import dagger.hilt.InstallIn
-import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.callbackFlow
 import okio.ByteString
@@ -99,11 +101,7 @@ class LoginWorkflowImpl @Inject constructor(
                         trySend(authResult).isSuccess
                     }
 
-                    val intent = AuthUI.getInstance()
-                        .createSignInIntentBuilder()
-                        .setAvailableProviders(listOf(AuthUI.IdpConfig.GoogleBuilder().build()))
-                        .build()
-                    signInLauncher.launch(intent)
+                    signInLauncher.launch(buildSignInIntent())
 
                     awaitClose {
                         signInLauncher.unregister()
@@ -167,19 +165,27 @@ class LoginWorkflowImpl @Inject constructor(
         }
     }
 
-    private fun FirebaseUser.toUser(): User = User(
-        uid = this.uid,
-        name = this.displayName ?: "",
-        email = this.email ?: "",
-    )
+    private fun buildSignInIntent(): Intent {
+        val layout = AuthMethodPickerLayout.Builder(R.layout.auth_method_picker_custom_layout)
+            .setGoogleButtonId(R.id.custom_google_signin_button)
+            .setAppleButtonId(R.id.custom_apple_signin_button)
+            .setTosAndPrivacyPolicyId(R.id.custom_tos_pp)
+            .build()
+
+        return AuthUI.getInstance()
+            .createSignInIntentBuilder()
+            .setIsSmartLockEnabled(!BuildConfig.DEBUG, true)
+            .setAuthMethodPickerLayout(layout)
+            .setLogo(R.drawable.ic_launcher_background)
+            .setTheme(R.style.Theme_WorkflowShenanigans_Login)
+            .setAvailableProviders(
+                listOf(
+                    AuthUI.IdpConfig.GoogleBuilder().build(),
+                    AuthUI.IdpConfig.AppleBuilder().build(),
+                )
+            )
+            .build()
+    }
 
     override fun snapshotState(state: State): Snapshot = state.toSnapshot()
-}
-
-@Module
-@InstallIn(SingletonComponent::class)
-abstract class LoginModule {
-
-    @Binds
-    abstract fun bindLoginWorkflow(impl: LoginWorkflowImpl): LoginWorkflow
 }

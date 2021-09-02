@@ -20,10 +20,6 @@ import com.squareup.workflow1.ui.backstack.BackStackContainer
 import com.squareup.workflow1.ui.backstack.BackStackScreen
 import com.squareup.workflow1.ui.backstack.toBackStackScreen
 import com.squareup.workflow1.ui.plus
-import dagger.Binds
-import dagger.Module
-import dagger.hilt.InstallIn
-import dagger.hilt.components.SingletonComponent
 import javax.inject.Inject
 
 interface ShenanigansWorkflow : Workflow<ActivityAndProps<Unit>, Nothing, BackStackScreen<Any>> {
@@ -98,12 +94,4 @@ class ShenanigansWorkflowImpl @Inject constructor(
     override fun snapshotState(state: State): Snapshot {
         return Snapshot.of(if (state == State.Welcome) 0 else 1)
     }
-}
-
-@Module
-@InstallIn(SingletonComponent::class)
-abstract class ShenanigansModule {
-
-    @Binds
-    abstract fun bindShenanigansWorkflow(impl: ShenanigansWorkflowImpl): ShenanigansWorkflow
 }

@@ -4,7 +4,6 @@ package com.shiftstudio.workflowshenanigans.welcome
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.material.Button
 import androidx.compose.material.Text
@@ -20,16 +19,10 @@ import com.squareup.workflow1.StatelessWorkflow
 import com.squareup.workflow1.Workflow
 import com.squareup.workflow1.ui.AndroidViewRendering
 import com.squareup.workflow1.ui.ViewEnvironment
-import com.squareup.workflow1.ui.ViewRegistry
 import com.squareup.workflow1.ui.WorkflowUiExperimentalApi
 import com.squareup.workflow1.ui.compose.ComposeRendering
 import com.squareup.workflow1.ui.compose.WorkflowRendering
-import com.squareup.workflow1.ui.compose.composeViewFactory
 import com.squareup.workflow1.ui.compose.renderAsState
-import dagger.Binds
-import dagger.Module
-import dagger.hilt.InstallIn
-import dagger.hilt.components.SingletonComponent
 import javax.inject.Inject
 
 interface WelcomeWorkflow : Workflow<Unit, Output, AndroidViewRendering<*>> {

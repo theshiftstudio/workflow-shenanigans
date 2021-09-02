@@ -5,8 +5,8 @@ import com.shiftstudio.workflowshenanigans.ShenanigansWorkflow.ActivityAndProps
 import com.shiftstudio.workflowshenanigans.account.AccountWorkflow.Back
 import com.shiftstudio.workflowshenanigans.account.AccountWorkflowImpl.State
 import com.shiftstudio.workflowshenanigans.login.LoginWorkflow
-import com.shiftstudio.workflowshenanigans.login.User
-import com.shiftstudio.workflowshenanigans.login.UserRepository
+import com.shiftstudio.workflowshenanigans.login.domain.User
+import com.shiftstudio.workflowshenanigans.login.domain.UserRepository
 import com.squareup.workflow1.Snapshot
 import com.squareup.workflow1.StatefulWorkflow
 import com.squareup.workflow1.Workflow
@@ -20,11 +20,10 @@ import com.squareup.workflow1.runningWorker
 import com.squareup.workflow1.writeBooleanAsInt
 import com.squareup.workflow1.writeByteStringWithLength
 import com.squareup.workflow1.writeUtf8WithLength
-import dagger.Binds
-import dagger.Module
-import dagger.hilt.InstallIn
-import dagger.hilt.components.SingletonComponent
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.delayFlow
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.onStart
 import okio.ByteString
 import javax.inject.Inject
 
@@ -151,12 +150,4 @@ class AccountWorkflowImpl @Inject constructor(
     }
 
     override fun snapshotState(state: State): Snapshot = state.toSnapshot()
-}
-
-@Module
-@InstallIn(SingletonComponent::class)
-abstract class AccountModule {
-
-    @Binds
-    abstract fun bindAccountWorkflow(impl: AccountWorkflowImpl): AccountWorkflow
 }
