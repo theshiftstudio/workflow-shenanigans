@@ -2,7 +2,6 @@ package com.shiftstudio.workflowshenanigans.account
 
 import android.os.Parcelable
 import android.util.Log
-import com.shiftstudio.workflowshenanigans.ShenanigansWorkflow.ActivityAndProps
 import com.shiftstudio.workflowshenanigans.account.AccountWorkflow.Back
 import com.shiftstudio.workflowshenanigans.account.AccountWorkflowImpl.State
 import com.shiftstudio.workflowshenanigans.login.LoginWorkflow
@@ -20,7 +19,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
 
-interface AccountWorkflow : Workflow<ActivityAndProps<Unit>, Back, Any> {
+interface AccountWorkflow : Workflow<Unit, Back, Any> {
 
     object Back
 }
@@ -32,7 +31,7 @@ data class UserRendering(val user: User, val onSignOut: () -> Unit)
 class AccountWorkflowImpl @Inject constructor(
     private val userRepository: UserRepository,
     private val loginWorkflow: LoginWorkflow,
-) : AccountWorkflow, StatefulWorkflow<ActivityAndProps<Unit>, State, Back, Any>() {
+) : AccountWorkflow, StatefulWorkflow<Unit, State, Back, Any>() {
 
     sealed class State : Parcelable {
         @Parcelize
@@ -45,11 +44,11 @@ class AccountWorkflowImpl @Inject constructor(
         data class Authorized(val user: User, val signingOut: Boolean = false) : State()
     }
 
-    override fun initialState(props: ActivityAndProps<Unit>, snapshot: Snapshot?): State =
+    override fun initialState(props: Unit, snapshot: Snapshot?): State =
         snapshot?.toParcelable() ?: State.Loading
 
     override fun render(
-        renderProps: ActivityAndProps<Unit>,
+        renderProps: Unit,
         renderState: State,
         context: RenderContext
     ): Any {
