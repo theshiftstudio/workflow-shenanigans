@@ -6,6 +6,8 @@ plugins {
     kotlin("plugin.serialization")
 
     id("dagger.hilt.android.plugin")
+
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -105,8 +107,6 @@ dependencies {
 
     implementation(COIL.compose)
 
-    // implementation("com.squareup.workflow1:workflow-ui-core-android:_")
-    // implementation(Dependencies.Square.Workflow.uiCoreAndroid)
     implementation(Dependencies.Square.Workflow.compose)
     implementation(Dependencies.Square.Workflow.composeTooling)
 
@@ -114,6 +114,10 @@ dependencies {
     implementation(AndroidX.lifecycle.viewModelKtx)
     implementation(AndroidX.lifecycle.viewModelCompose)
     implementation(AndroidX.lifecycle.viewModelSavedState)
+
+    implementation(platform(Firebase.bom))
+    implementation(Firebase.authenticationKtx)
+    implementation(Dependencies.Firebase.uiAuth)
 
     debugImplementation(Square.leakCanary.android)
 
