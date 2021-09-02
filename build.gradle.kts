@@ -29,6 +29,8 @@ buildscript {
         classpath(Dependencies.ktlint)
         classpath(Dependencies.detekt)
 
+        // classpath(Google.playServicesGradlePlugin)
+
         // classpath("com.vanniktech:gradle-dependency-graph-generator-plugin:_")
 
         // NOTE: Do not place your application dependencies here; they belong
