@@ -7,13 +7,13 @@ import com.shiftstudio.workflowshenanigans.ShenanigansWorkflow.ActivityAndProps
 import com.shiftstudio.workflowshenanigans.account.AccountViewRegistry
 import com.shiftstudio.workflowshenanigans.account.AccountWorkflow
 import com.shiftstudio.workflowshenanigans.login.LoginViewRegistry
-import com.shiftstudio.workflowshenanigans.welcome.WelcomeViewRegistry
 import com.shiftstudio.workflowshenanigans.welcome.WelcomeWorkflow
 import com.squareup.workflow1.Snapshot
 import com.squareup.workflow1.StatefulWorkflow
 import com.squareup.workflow1.Workflow
 import com.squareup.workflow1.action
 import com.squareup.workflow1.parse
+import com.squareup.workflow1.ui.NamedViewFactory
 import com.squareup.workflow1.ui.ViewRegistry
 import com.squareup.workflow1.ui.WorkflowUiExperimentalApi
 import com.squareup.workflow1.ui.backstack.BackStackContainer
@@ -34,10 +34,9 @@ interface ShenanigansWorkflow : Workflow<ActivityAndProps<Unit>, Nothing, BackSt
     )
 }
 
-val ShenanigansViewRegistry: ViewRegistry =
-    ViewRegistry(BackStackContainer) + WelcomeViewRegistry +
-        AccountViewRegistry +
-        LoginViewRegistry
+val ShenanigansViewRegistry: ViewRegistry = ViewRegistry(BackStackContainer, NamedViewFactory) +
+    AccountViewRegistry +
+    LoginViewRegistry
 
 class ShenanigansWorkflowImpl @Inject constructor(
     private val welcomeWorkflow: WelcomeWorkflow,
@@ -72,10 +71,6 @@ class ShenanigansWorkflowImpl @Inject constructor(
         when (renderState) {
             is State.Welcome -> {
                 // We always add the welcome screen to the backstack, so this is a no op.
-                // val welcomeScreen = context.renderChild(welcomeWorkflow, Unit) { output ->
-                //     handleWelcomeOutput(output)
-                // }
-                // welcomeScreen
             }
             is State.Account -> {
                 val accountScreen = context.renderChild(accountWorkflow, renderProps) {

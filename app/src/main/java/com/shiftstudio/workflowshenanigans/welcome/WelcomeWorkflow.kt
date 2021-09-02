@@ -18,9 +18,11 @@ import androidx.compose.ui.unit.dp
 import com.shiftstudio.workflowshenanigans.welcome.WelcomeWorkflow.Output
 import com.squareup.workflow1.StatelessWorkflow
 import com.squareup.workflow1.Workflow
+import com.squareup.workflow1.ui.AndroidViewRendering
 import com.squareup.workflow1.ui.ViewEnvironment
 import com.squareup.workflow1.ui.ViewRegistry
 import com.squareup.workflow1.ui.WorkflowUiExperimentalApi
+import com.squareup.workflow1.ui.compose.ComposeRendering
 import com.squareup.workflow1.ui.compose.WorkflowRendering
 import com.squareup.workflow1.ui.compose.composeViewFactory
 import com.squareup.workflow1.ui.compose.renderAsState
@@ -30,49 +32,25 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Inject
 
-interface WelcomeWorkflow : Workflow<Unit, Output, WelcomeRendering> {
+interface WelcomeWorkflow : Workflow<Unit, Output, AndroidViewRendering<*>> {
 
     sealed class Output {
         object GoToAccount : Output()
     }
 }
 
-data class WelcomeRendering(val onAccountTapped: () -> Unit)
+class WelcomeWorkflowImpl @Inject constructor() : WelcomeWorkflow,
+    StatelessWorkflow<Unit, Output, AndroidViewRendering<*>>() {
 
-val WelcomeBinding = composeViewFactory<WelcomeRendering> { rendering, _ ->
-
-    Column(modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
-        Spacer(modifier = Modifier.height(126.dp))
-        Button(onClick = rendering.onAccountTapped) {
-            Text(text = "Account")
+    override fun render(renderProps: Unit, context: RenderContext): AndroidViewRendering<*> =
+        ComposeRendering {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Spacer(modifier = Modifier.height(126.dp))
+                Button(onClick = context.eventHandler { setOutput(Output.GoToAccount) }) {
+                    Text(text = "Account")
+                }
+            }
         }
-    }
-}
-
-val WelcomeViewRegistry = ViewRegistry(WelcomeBinding)
-
-class WelcomeWorkflowImpl @Inject constructor() : WelcomeWorkflow, StatelessWorkflow<Unit, Output, WelcomeRendering>() {
-
-    override fun render(renderProps: Unit, context: RenderContext): WelcomeRendering =
-        WelcomeRendering(
-            onAccountTapped = context.eventHandler { setOutput(Output.GoToAccount) }
-        )
-    // ComposeRendering {
-    //     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-    //         Spacer(modifier = Modifier.height(126.dp))
-    //         Button(onClick = context.eventHandler { setOutput(Output.GoToAccount) }) {
-    //             Text(text = "Account")
-    //         }
-    //     }
-    // }
-}
-
-@Module
-@InstallIn(SingletonComponent::class)
-abstract class WelcomeModule {
-
-    @Binds
-    abstract fun bindWelcomeWorkflow(impl: WelcomeWorkflowImpl): WelcomeWorkflow
 }
 
 @Preview
