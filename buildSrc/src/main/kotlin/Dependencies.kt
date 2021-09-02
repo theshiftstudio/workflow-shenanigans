@@ -28,6 +28,13 @@ object Dependencies {
 
     const val detekt = "io.gitlab.arturbosch.detekt:detekt-gradle-plugin:_"
 
+    object Firebase {
+        const val crashlyticsGradlePlugin = "com.google.firebase:firebase-crashlytics-gradle:_"
+        const val perfGradlePlugin = "com.google.firebase:perf-plugin:_"
+
+        const val uiAuth = "com.firebaseui:firebase-ui-auth:_"
+    }
+
     object Kotlin {
 
         const val gradlePlugin = "org.jetbrains.kotlin:kotlin-gradle-plugin:_"

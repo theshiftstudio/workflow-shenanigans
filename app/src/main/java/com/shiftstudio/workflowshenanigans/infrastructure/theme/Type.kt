@@ -1,4 +1,4 @@
-package com.shiftstudio.workflowshenanigans.ui.theme
+package com.shiftstudio.workflowshenanigans.infrastructure.theme
 
 import androidx.compose.material.Typography
 import androidx.compose.ui.text.TextStyle

@@ -1,4 +1,4 @@
-package com.shiftstudio.workflowshenanigans.ui.theme
+package com.shiftstudio.workflowshenanigans.infrastructure.theme
 
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Shapes

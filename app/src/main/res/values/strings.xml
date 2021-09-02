@@ -1,3 +1,8 @@
-<resources>
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:ns2="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name">Workflow Shenanigans</string>
+
+    <string name="no_internet" translation_descripition="User message shown when sign-in is attempted while offline.">Network error, check your internet connection.</string>
+
+    <string name="tos_and_pp" translation_description="Global ToS and privacy policy message">By continuing, you are indicating that you accept our <ns2:g example="https://google.com/terms" id="tos" translation_description="Terms of service text">%1$s</ns2:g> and <ns2:g example="https://google.com/privacy" id="pp" translation_description="Privacy policy text">%2$s</ns2:g>.</string>
 </resources>
