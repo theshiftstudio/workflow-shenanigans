@@ -3,8 +3,6 @@
 package com.shiftstudio.workflowshenanigans
 
 import android.os.Parcelable
-import androidx.activity.ComponentActivity
-import com.shiftstudio.workflowshenanigans.ShenanigansWorkflow.ActivityAndProps
 import com.shiftstudio.workflowshenanigans.account.AccountViewRegistry
 import com.shiftstudio.workflowshenanigans.account.AccountWorkflow
 import com.shiftstudio.workflowshenanigans.login.LoginViewRegistry
@@ -25,13 +23,7 @@ import com.squareup.workflow1.ui.toSnapshot
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
 
-interface ShenanigansWorkflow : Workflow<ActivityAndProps<Unit>, Nothing, BackStackScreen<Any>> {
-
-    data class ActivityAndProps<R>(
-        val activity: ComponentActivity,
-        val props: R
-    )
-}
+interface ShenanigansWorkflow : Workflow<Unit, Nothing, BackStackScreen<Any>>
 
 val ShenanigansViewRegistry: ViewRegistry = ViewRegistry(BackStackContainer, NamedViewFactory) +
     AccountViewRegistry +
@@ -41,7 +33,7 @@ class ShenanigansWorkflowImpl @Inject constructor(
     private val welcomeWorkflow: WelcomeWorkflow,
     private val accountWorkflow: AccountWorkflow,
 ) : ShenanigansWorkflow,
-    StatefulWorkflow<ActivityAndProps<Unit>, ShenanigansWorkflowImpl.State, Nothing, BackStackScreen<Any>>() {
+    StatefulWorkflow<Unit, ShenanigansWorkflowImpl.State, Nothing, BackStackScreen<Any>>() {
 
     sealed class State : Parcelable {
         @Parcelize
@@ -51,11 +43,11 @@ class ShenanigansWorkflowImpl @Inject constructor(
         object Account : State()
     }
 
-    override fun initialState(props: ActivityAndProps<Unit>, snapshot: Snapshot?): State =
+    override fun initialState(props: Unit, snapshot: Snapshot?): State =
         snapshot?.toParcelable() ?: State.Welcome
 
     override fun render(
-        renderProps: ActivityAndProps<Unit>,
+        renderProps: Unit,
         renderState: State,
         context: RenderContext
     ): BackStackScreen<Any> {

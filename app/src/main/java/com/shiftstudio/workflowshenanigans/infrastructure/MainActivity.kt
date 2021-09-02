@@ -10,7 +10,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import com.shiftstudio.workflowshenanigans.ShenanigansViewRegistry
 import com.shiftstudio.workflowshenanigans.ShenanigansWorkflow
-import com.shiftstudio.workflowshenanigans.ShenanigansWorkflow.ActivityAndProps
 import com.shiftstudio.workflowshenanigans.infrastructure.theme.WorkflowShenanigansTheme
 import com.squareup.workflow1.ui.ViewEnvironment
 import com.squareup.workflow1.ui.ViewRegistry
@@ -37,9 +36,7 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colors.background
                 ) {
 
-                    val rendering by shenanigansWorkflow.renderAsState(
-                        props = ActivityAndProps(this, Unit), onOutput = {}
-                    )
+                    val rendering by shenanigansWorkflow.renderAsState(Unit, onOutput = {})
 
                     WorkflowRendering(
                         rendering,

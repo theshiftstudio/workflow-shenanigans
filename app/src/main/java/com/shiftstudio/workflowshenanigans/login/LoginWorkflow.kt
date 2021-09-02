@@ -1,6 +1,7 @@
 package com.shiftstudio.workflowshenanigans.login
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.os.Parcelable
 import com.firebase.ui.auth.AuthMethodPickerLayout
@@ -10,7 +11,7 @@ import com.firebase.ui.auth.data.model.FirebaseAuthUIAuthenticationResult
 import com.google.firebase.auth.FirebaseAuth
 import com.shiftstudio.workflowshenanigans.BuildConfig
 import com.shiftstudio.workflowshenanigans.R
-import com.shiftstudio.workflowshenanigans.ShenanigansWorkflow.ActivityAndProps
+import com.shiftstudio.workflowshenanigans.infrastructure.findActivity
 import com.shiftstudio.workflowshenanigans.login.LoginWorkflow.LoginResult
 import com.shiftstudio.workflowshenanigans.login.LoginWorkflowImpl.State
 import com.shiftstudio.workflowshenanigans.login.domain.User
@@ -25,12 +26,13 @@ import com.squareup.workflow1.asWorker
 import com.squareup.workflow1.runningWorker
 import com.squareup.workflow1.ui.toParcelable
 import com.squareup.workflow1.ui.toSnapshot
+import dagger.hilt.android.qualifiers.ActivityContext
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
 
-interface LoginWorkflow : Workflow<ActivityAndProps<Unit>, LoginResult, Any> {
+interface LoginWorkflow : Workflow<Unit, LoginResult, Any> {
 
     sealed class LoginResult {
         data class Authorized(val user: User) : LoginResult()
@@ -46,8 +48,9 @@ data class AuthorizingRendering(val message: String = "Hold tight...")
 data class AuthorizationFailed(val cause: String, val onRetry: () -> Unit)
 
 class LoginWorkflowImpl @Inject constructor(
+    @ActivityContext private val activityContext: Context,
     private val userRepository: UserRepository,
-) : LoginWorkflow, StatefulWorkflow<ActivityAndProps<Unit>, State, LoginResult, Any>() {
+) : LoginWorkflow, StatefulWorkflow<Unit, State, LoginResult, Any>() {
 
     sealed class State : Parcelable {
         @Parcelize
@@ -60,23 +63,24 @@ class LoginWorkflowImpl @Inject constructor(
         data class Failed(val cause: String) : State()
     }
 
-    override fun initialState(props: ActivityAndProps<Unit>, snapshot: Snapshot?): State =
+    override fun initialState(props: Unit, snapshot: Snapshot?): State =
         snapshot?.toParcelable() ?: State.Authorizing
 
     override fun render(
-        renderProps: ActivityAndProps<Unit>,
+        renderProps: Unit,
         renderState: State,
         context: RenderContext
     ): Any = when (renderState) {
         is State.Authorizing -> {
             context.runningWorker(
                 callbackFlow {
-                    val signInLauncher = renderProps.activity.activityResultRegistry.register(
-                        "Key-FirebaseAuthUIActivityResultContract",
-                        FirebaseAuthUIActivityResultContract()
-                    ) { authResult ->
-                        trySend(authResult).isSuccess
-                    }
+                    val signInLauncher = activityContext.findActivity()
+                        .activityResultRegistry.register(
+                            "Key-FirebaseAuthUIActivityResultContract",
+                            FirebaseAuthUIActivityResultContract()
+                        ) { authResult ->
+                            trySend(authResult).isSuccess
+                        }
 
                     signInLauncher.launch(buildSignInIntent())
 
